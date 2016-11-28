@@ -1,5 +1,6 @@
-import requests
 import json
+
+import requests
 
 LEG_WITH_SOCKET = [
     132369, 132410, 137044, 132444, 132449, 132452, 132460, 133973, 133974, 137037, 137038, 137039, 137040,
@@ -63,7 +64,8 @@ def get_enchants(player_dictionary):
 
 
 def get_progress(player_dictionary, raid):
-    r = [x for x in player_dictionary["progression"]["raids"] if x["name"] in raid][0]
+    r = [x for x in player_dictionary["progression"]
+         ["raids"] if x["name"] in raid][0]
     normal = 0
     heroic = 0
     mythic = 0
@@ -99,35 +101,61 @@ def get_char(name, server):
 
     player_progression_dict = json.loads(r.text)
 
+    r = requests.get(
+        "https://us.api.battle.net/wow/data/character/classes?locale=en_US&apikey=%s" % (API_KEY))
+    if r.status_code != 200:
+        raise Exception("Could Not Find Character classes (No 200 From API)")
+    class_dict = json.loads(r.text)
+    class_dict = {c['id']: c['name'] for c in class_dict["classes"]}
+
     equipped_ivl = player_item_dict["items"]["averageItemLevelEquipped"]
     sockets = get_sockets(player_item_dict)
     enchants = get_enchants(player_item_dict)
     tov_progress = get_progress(player_progression_dict, "Trial of Valor")
-    en_progress = get_progress(player_progression_dict, "The Emerald Nightmare")
+    en_progress = get_progress(
+        player_progression_dict, "The Emerald Nightmare")
 
-    return_string = "%s on %s\n-------------------------\n" % (name.title(), server.title())
+    armory_url = 'http://us.battle.net/wow/en/character/{}/{}/advanced'.format(
+        server, name)
+
+    return_string = ''
+    return_string += "**%s** - **%s**\n" % (
+        name.title(), server.title())
+
+    return_string += '{} | {}\n'.format(player_item_dict['level'], class_dict[
+                                        player_item_dict['class']])
+    return_string += '<{}>\n'.format(armory_url)
+    return_string += '```Markdown\n'  # start Markdown
+
     # iLvL
     return_string += "Equipped Item Level: %s\n" % equipped_ivl
 
     # Raid Progression
     return_string += "EN: {1}/{0} (N), {2}/{0} (H), {3}/{0} (M)\n".format(en_progress["total_bosses"],
-                                                                          en_progress["normal"],
-                                                                          en_progress["heroic"],
+                                                                          en_progress[
+                                                                              "normal"],
+                                                                          en_progress[
+                                                                              "heroic"],
                                                                           en_progress["mythic"])
     return_string += "TOV: {1}/{0} (N), {2}/{0} (H), {3}/{0} (M)\n".format(tov_progress["total_bosses"],
-                                                                           tov_progress["normal"],
-                                                                           tov_progress["heroic"],
+                                                                           tov_progress[
+                                                                               "normal"],
+                                                                           tov_progress[
+                                                                               "heroic"],
                                                                            tov_progress["mythic"])
 
     # Gems
-    return_string += "Gems Equipped: %s/%s\n" % (sockets["equipped_gems"], sockets["total_sockets"])
+    return_string += "Gems Equipped: %s/%s\n" % (
+        sockets["equipped_gems"], sockets["total_sockets"])
 
     # Enchants
     return_string += "Enchants: %s/%s\n" % (enchants["enchantable_slots"] - enchants["total_missing"],
                                             enchants["enchantable_slots"])
     if enchants["total_missing"] > 0:
-        return_string += "Missing Enchants: {0}".format(", ".join(enchants["missing_slots"]))
+        return_string += "Missing Enchants: {0}".format(
+            ", ".join(enchants["missing_slots"]))
 
+    return_string += '```'  # end Markdown
     return return_string
 
 
