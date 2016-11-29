@@ -1,6 +1,6 @@
 #PugBot
 
-PugBot is an open source Discord bot (built off of the amazing work of [discord.py](https://github.com/Rapptz/discord.py)) that gives you a quick glance at a World of Warcraft character. Use it to get a quick summary of any character (like Pugs!).
+PugBot is an open source Discord bot (built off of the amazing work of [discord.py](https://github.com/Rapptz/discord.py) that gives you a quick glance at a World of Warcraft character. Use it to get a quick summary of any character (like Pugs!).
 
 Example: [Screenshot](https://i.gyazo.com/2be324f099431ebf04e8914a50b98091.png)
 
