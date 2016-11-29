@@ -12,7 +12,14 @@ ENCHANTABLE_SLOTS = ["neck", "back", "finger1", "finger2"]
 
 config = json.loads(open('config.json').read())  # Load Configs
 API_KEY = config["blizzard_api_key"]
+default_region = config["default_region"]
 
+region_locale = {
+    'us': ['us', 'en_US', 'en'],
+#    'kr': ['kr', 'ko_KR', 'ko'],
+#    'tw': ['tw', 'zh_TW', 'zh'],
+    'eu': ['eu', 'en_GB', 'en']
+}
 
 def get_sockets(player_dictionary):
     """
@@ -83,6 +90,30 @@ def get_raid_progression(player_dictionary, raid):
             "mythic": mythic,
             "total_bosses": len(r["bosses"])}
 
+def get_mythic_progression(player_dictionary):
+    achievements = player_dictionary["achievements"]
+    plus_two = 0
+    plus_five = 0
+    plus_ten = 0
+
+    if 33096 in achievements["criteria"]:
+        index = achievements["criteria"].index(33096)
+        plus_two = achievements["criteriaQuantity"][index]
+
+    if 33097 in achievements["criteria"]:
+        index = achievements["criteria"].index(33097)
+        plus_five = achievements["criteriaQuantity"][index]
+
+    if 33098 in achievements["criteria"]:
+        index = achievements["criteria"].index(33098)
+        plus_ten = achievements["criteriaQuantity"][index]
+
+    return {
+        "plus_two": plus_two,
+        "plus_five": plus_five,
+        "plus_ten": plus_ten
+    }
+
 
 def get_mythic_progression(player_dictionary):
     achievements = player_dictionary["achievements"]
@@ -111,15 +142,21 @@ def get_mythic_progression(player_dictionary):
 
 def get_char(name, server):
     r = requests.get(
+<<<<<<< HEAD
+        "https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
+            region_locale[target_region][0], server, name, region_locale[target_region][1], API_KEY))
+=======
         "https://us.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=en_US&apikey=%s" % (
             server, name, API_KEY))
+>>>>>>> 869337f486d04a9e069ac94a5353ce7d90474011
     if r.status_code != 200:
         raise Exception("Could Not Find Character (No 200 from API)")
 
     player_dict = json.loads(r.text)
 
     r = requests.get(
-        "https://us.api.battle.net/wow/data/character/classes?locale=en_US&apikey=%s" % (API_KEY))
+        "https://%s.api.battle.net/wow/data/character/classes?locale=%s&apikey=%s" % (
+            region_locale[target_region][0], region_locale[target_region][1], API_KEY))
     if r.status_code != 200:
         raise Exception("Could Not Find Character Classes (No 200 From API)")
     class_dict = json.loads(r.text)
@@ -132,8 +169,8 @@ def get_char(name, server):
     en_progress = get_raid_progression(player_dict, "The Emerald Nightmare")
     mythic_progress = get_mythic_progression(player_dict)
 
-    armory_url = 'http://us.battle.net/wow/en/character/{}/{}/advanced'.format(
-        server, name)
+    armory_url = 'http://{}.battle.net/wow/{}/character/{}/{}/advanced'.format(
+        region_locale[target_region][0], region_locale[target_region][2], server, name)
 
     return_string = ''
     return_string += "**%s** - **%s** - **%s %s**\n" % (
@@ -175,11 +212,14 @@ def get_char(name, server):
 
 
 async def pug(client, message):
+    target_region = default_region
     try:
         i = str(message.content).split(' ')
         name = i[1]
         server = i[2]
-        character_info = get_char(name, server)
+        if len(i) == 4 and i[3].lower() in region_locale.keys():
+            target_region = i[3].lower()
+        character_info = get_char(name, server, target_region)
         await client.send_message(message.channel, character_info)
     except Exception as e:
         await client.send_message(message.channel, "Error With Name or Server\n"
