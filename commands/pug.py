@@ -141,14 +141,9 @@ def get_mythic_progression(player_dictionary):
 
 
 def get_char(name, server):
-    r = requests.get(
-<<<<<<< HEAD
-        "https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
+    r = requests.get("https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
             region_locale[target_region][0], server, name, region_locale[target_region][1], API_KEY))
-=======
-        "https://us.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=en_US&apikey=%s" % (
-            server, name, API_KEY))
->>>>>>> 869337f486d04a9e069ac94a5353ce7d90474011
+    
     if r.status_code != 200:
         raise Exception("Could Not Find Character (No 200 from API)")
 
@@ -223,5 +218,5 @@ async def pug(client, message):
         await client.send_message(message.channel, character_info)
     except Exception as e:
         await client.send_message(message.channel, "Error With Name or Server\n"
-                                                   "Use: !pug <name> <server>\n"
+                                                   "Use: !pug <name> <server> <region>\n"
                                                    "Hyphenate Two Word Servers (Ex: Twisting-Nether)")
