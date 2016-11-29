@@ -22,7 +22,7 @@ Note: You need proper privileges to invite a bot your server.
 ## Configuration
 If you want to download PugBot and host him yourself, you will need the following:
 
-+ A Discord Bot Token ([Click Here](https://discordapp.com/developers/applications/]))
++ A Discord Bot Token ([Click Here](https://discordapp.com/developers/applications/))
 + A WoW API Key ([dev.battle.net](https://dev.battle.net))
 
 Add the token and api key to config.json and run pugbot.py
