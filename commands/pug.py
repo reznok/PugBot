@@ -63,7 +63,7 @@ def get_enchants(player_dictionary):
     }
 
 
-def get_progress(player_dictionary, raid):
+def get_raid_progression(player_dictionary, raid):
     r = [x for x in player_dictionary["progression"]
     ["raids"] if x["name"] in raid][0]
     normal = 0
@@ -84,9 +84,34 @@ def get_progress(player_dictionary, raid):
             "total_bosses": len(r["bosses"])}
 
 
+def get_mythic_progression(player_dictionary):
+    achievements = player_dictionary["achievements"]
+    plus_two = 0
+    plus_five = 0
+    plus_ten = 0
+
+    if 33096 in achievements["criteria"]:
+        index = achievements["criteria"].index(33096)
+        plus_two = achievements["criteriaQuantity"][index]
+
+    if 33097 in achievements["criteria"]:
+        index = achievements["criteria"].index(33097)
+        plus_five = achievements["criteriaQuantity"][index]
+
+    if 33098 in achievements["criteria"]:
+        index = achievements["criteria"].index(33098)
+        plus_ten = achievements["criteriaQuantity"][index]
+
+    return {
+        "plus_two": plus_two,
+        "plus_five": plus_five,
+        "plus_ten": plus_ten
+    }
+
+
 def get_char(name, server):
     r = requests.get(
-        "https://us.api.battle.net/wow/character/%s/%s?fields=items+progression&locale=en_US&apikey=%s" % (
+        "https://us.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=en_US&apikey=%s" % (
             server, name, API_KEY))
     if r.status_code != 200:
         raise Exception("Could Not Find Character (No 200 from API)")
@@ -103,8 +128,9 @@ def get_char(name, server):
     equipped_ivl = player_dict["items"]["averageItemLevelEquipped"]
     sockets = get_sockets(player_dict)
     enchants = get_enchants(player_dict)
-    tov_progress = get_progress(player_dict, "Trial of Valor")
-    en_progress = get_progress(player_dict, "The Emerald Nightmare")
+    tov_progress = get_raid_progression(player_dict, "Trial of Valor")
+    en_progress = get_raid_progression(player_dict, "The Emerald Nightmare")
+    mythic_progress = get_mythic_progression(player_dict)
 
     armory_url = 'http://us.battle.net/wow/en/character/{}/{}/advanced'.format(
         server, name)
@@ -117,6 +143,11 @@ def get_char(name, server):
 
     # iLvL
     return_string += "Equipped Item Level: %s\n" % equipped_ivl
+
+    # Mythic Progression
+    return_string += "Mythics: +2: %s, +5: %s, +10: %s\n" % (mythic_progress["plus_two"],
+                                                             mythic_progress["plus_five"],
+                                                             mythic_progress["plus_ten"])
 
     # Raid Progression
     return_string += "EN: {1}/{0} (N), {2}/{0} (H), {3}/{0} (M)\n".format(en_progress["total_bosses"],
@@ -151,4 +182,6 @@ async def pug(client, message):
         character_info = get_char(name, server)
         await client.send_message(message.channel, character_info)
     except Exception as e:
-        await client.send_message(message.channel, "Error: %s" % e)
+        await client.send_message(message.channel, "Error With Name or Server\n"
+                                                   "Use: !pug <name> <server>\n"
+                                                   "Hyphenate Two Word Servers (Ex: Twisting-Nether)")
