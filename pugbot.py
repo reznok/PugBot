@@ -4,7 +4,6 @@ import json
 # Commands #
 from commands.pug import pug
 
-
 config = json.loads(open('config.json').read())  # Load Configs
 DISCORD_TOKEN = config["discord_token"]
 client = discord.Client()
@@ -20,8 +19,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
+    if message.content.startswith('!info') or message.content.startswith('!help'):
+        await client.send_message(message.channel, "I'm PugBot, the pug analyzer!\n"
+                                                   "Use: !pug <name> <server> \n"
+                                                   "Example: !pug Basimot Lightbringer")
+
     if message.content.startswith('!pug'):
-        print(str(message.author))
         await pug(client, message)
 
 client.run(DISCORD_TOKEN)
