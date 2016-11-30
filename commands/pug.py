@@ -120,31 +120,6 @@ def get_mythic_progression(player_dictionary):
     }
 
 
-def get_mythic_progression(player_dictionary):
-    achievements = player_dictionary["achievements"]
-    plus_two = 0
-    plus_five = 0
-    plus_ten = 0
-
-    if 33096 in achievements["criteria"]:
-        index = achievements["criteria"].index(33096)
-        plus_two = achievements["criteriaQuantity"][index]
-
-    if 33097 in achievements["criteria"]:
-        index = achievements["criteria"].index(33097)
-        plus_five = achievements["criteriaQuantity"][index]
-
-    if 33098 in achievements["criteria"]:
-        index = achievements["criteria"].index(33098)
-        plus_ten = achievements["criteriaQuantity"][index]
-
-    return {
-        "plus_two": plus_two,
-        "plus_five": plus_five,
-        "plus_ten": plus_ten
-    }
-
-
 def get_char(name, server, target_region):
     r = requests.get("https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
             region_locale[target_region][0], server, name, region_locale[target_region][1], API_KEY))
