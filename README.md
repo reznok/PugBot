@@ -13,7 +13,9 @@ Example:
 
 ## Add To Your Server
 I (Reznok) am not currently hosting PugBot. Please either self host it, or find someone who is hosting it.  
+  
 If you need help with setup, feel free to message me on reddit (/u/xeznok), and I will be happy to help.  
+  
 If you are hosting PugBot and want to spread the love, submit a PR with your Bot invite link or send me a reddit message, and I'll add him here!
 
 ## Configuration
