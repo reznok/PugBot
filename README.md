@@ -12,7 +12,7 @@ Example:
 
 
 ## Add To Your Server
-I (Reznok) am not currently hosting PugBot. Please either self host him, or find someone who is.  
+I (Reznok) am not currently hosting PugBot. Please either self host it, or find someone who is hosting it.  
 If you are hosting PugBot, submit a PR with your Bot invite link, and I'll add him here!
 
 ## Configuration
