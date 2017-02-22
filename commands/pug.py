@@ -9,6 +9,7 @@ LEG_WITH_SOCKET = [
 ]
 
 ENCHANTABLE_SLOTS = ["neck", "back", "finger1", "finger2"]
+RAIDS = [('The Emerald Nightmare', 'EN'), ('Trial of Valor', 'TOV'), ('The Nighthold', 'NH')]
 
 config = json.loads(open('config.json').read())  # Load Configs
 API_KEY = config["blizzard_api_key"]
@@ -44,7 +45,7 @@ def get_sockets(player_dictionary):
 
             if item in ["neck", "finger1", "finger2"]:
                 if player_dictionary["items"][item]["context"] == "trade-skill":
-                    sockets += 1                
+                    sockets += 1
 
         for ttip in player_dictionary["items"][item]["tooltipParams"]:
             if item in "mainHand" or item in "offHand":  # Ignore Relic
@@ -123,7 +124,7 @@ def get_mythic_progression(player_dictionary):
 def get_char(name, server, target_region):
     r = requests.get("https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
             region_locale[target_region][0], server, name, region_locale[target_region][1], API_KEY))
-    
+
     if r.status_code != 200:
         raise Exception("Could Not Find Character (No 200 from API)")
 
@@ -140,9 +141,18 @@ def get_char(name, server, target_region):
     equipped_ivl = player_dict["items"]["averageItemLevelEquipped"]
     sockets = get_sockets(player_dict)
     enchants = get_enchants(player_dict)
-    tov_progress = get_raid_progression(player_dict, "Trial of Valor")
-    en_progress = get_raid_progression(player_dict, "The Emerald Nightmare")
+
     mythic_progress = get_mythic_progression(player_dict)
+
+    # Build raid progression
+    raid_progress = {}
+    for raid in RAIDS:
+        raid_name = raid[0]
+        raid_abrv = raid[1]
+        raid_progress[raid_name] = {
+            'abrv': raid_abrv,
+            'progress': get_raid_progression(player_dict, raid_name)
+        }
 
     armory_url = 'http://{}.battle.net/wow/{}/character/{}/{}/advanced'.format(
         region_locale[target_region][0], region_locale[target_region][2], server, name)
@@ -162,14 +172,15 @@ def get_char(name, server, target_region):
                                                              mythic_progress["plus_ten"])
 
     # Raid Progression
-    return_string += "EN: {1}/{0} (N), {2}/{0} (H), {3}/{0} (M)\n".format(en_progress["total_bosses"],
-                                                                          en_progress["normal"],
-                                                                          en_progress["heroic"],
-                                                                          en_progress["mythic"])
-    return_string += "TOV: {1}/{0} (N), {2}/{0} (H), {3}/{0} (M)\n".format(tov_progress["total_bosses"],
-                                                                           tov_progress["normal"],
-                                                                           tov_progress["heroic"],
-                                                                           tov_progress["mythic"])
+    for raid, data in raid_progress.items():
+        progress = data['progress']
+        return_string += '{abrv}: {normal}/{total} (N), {heroic}/{total} (H), {mythic}/{total} (M)\n'.format(
+            abrv=data['abrv'],
+            normal=progress['normal'],
+            heroic=progress['heroic'],
+            mythic=progress['mythic'],
+            total=progress['total_bosses']
+        )
 
     # Gems
     return_string += "Gems Equipped: %s/%s\n" % (
