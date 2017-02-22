@@ -12,12 +12,8 @@ Example:
 
 
 ## Add To Your Server
-Adding PugBot to your server is easy.
- 
-Just go to: [Add PugBot](https://discordapp.com/oauth2/authorize?client_id=252939680465682433&scope=bot&permissions=0)
-
-Note: You need proper privileges to invite a bot your server. 
-
+I (Reznok) am not currently hosting PugBot. Please either self host him, or find someone who is.  
+If you are hosting PugBot, submit a PR with your Bot invite link, and I'll add him here!
 
 ## Configuration
 If you want to download PugBot and host him yourself, you will need the following:
