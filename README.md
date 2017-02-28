@@ -12,7 +12,7 @@ Example:
 
 
 ## Add To Your Server
-I (Reznok) am not currently hosting PugBot. Please either self host it, or find someone who is hosting it.  
+I (Reznok) am not currently hosting PugBot. Please either self host it, or find someone who is hosting it.
   
 If you need help with setup, feel free to message me on reddit ([/u/xeznok](https://www.reddit.com/user/xeznok/)), and I will be happy to help.  
   
@@ -26,5 +26,12 @@ If you want to download PugBot and host him yourself, you will need the followin
 
 Add the token and api key to config.json and run pugbot.py
 
+### Docker
 
+Once you have a Discord Bot Token and WoW API Key, simply:
 
+```sh
+docker run --name pugbot -e DISCORD_TOKEN=<your token> -e BLIZZARD_API_KEY=<your key> jadametz/wow-pugbot
+```
+
+This can be used to run your own PugBot on any laptop or server running [Docker](https://www.docker.com/).

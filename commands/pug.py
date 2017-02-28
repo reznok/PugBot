@@ -11,9 +11,6 @@ LEG_WITH_SOCKET = [
 ENCHANTABLE_SLOTS = ["neck", "back", "finger1", "finger2"]
 RAIDS = [('The Emerald Nightmare', 'EN'), ('Trial of Valor', 'TOV'), ('The Nighthold', 'NH')]
 
-config = json.loads(open('config.json').read())  # Load Configs
-API_KEY = config["blizzard_api_key"]
-default_region = config["default_region"]
 
 region_locale = {
     'us': ['us', 'en_US', 'en'],
@@ -121,9 +118,9 @@ def get_mythic_progression(player_dictionary):
     }
 
 
-def get_char(name, server, target_region):
+def get_char(name, server, target_region, api_key):
     r = requests.get("https://%s.api.battle.net/wow/character/%s/%s?fields=items+progression+achievements&locale=%s&apikey=%s" % (
-            region_locale[target_region][0], server, name, region_locale[target_region][1], API_KEY))
+            region_locale[target_region][0], server, name, region_locale[target_region][1], api_key))
 
     if r.status_code != 200:
         raise Exception("Could Not Find Character (No 200 from API)")
@@ -132,7 +129,7 @@ def get_char(name, server, target_region):
 
     r = requests.get(
         "https://%s.api.battle.net/wow/data/character/classes?locale=%s&apikey=%s" % (
-            region_locale[target_region][0], region_locale[target_region][1], API_KEY))
+            region_locale[target_region][0], region_locale[target_region][1], api_key))
     if r.status_code != 200:
         raise Exception("Could Not Find Character Classes (No 200 From API)")
     class_dict = json.loads(r.text)
@@ -197,15 +194,15 @@ def get_char(name, server, target_region):
     return return_string
 
 
-async def pug(client, message):
-    target_region = default_region
+async def pug(client, region, api_key, message):
+    target_region = region
     try:
         i = str(message.content).split(' ')
         name = i[1]
         server = i[2]
         if len(i) == 4 and i[3].lower() in region_locale.keys():
             target_region = i[3].lower()
-        character_info = get_char(name, server, target_region)
+        character_info = get_char(name, server, target_region, api_key)
         await client.send_message(message.channel, character_info)
     except Exception as e:
         print(e)
